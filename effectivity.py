@@ -274,7 +274,7 @@ def is_in_cone(v, vectors, rels):
     bounds.extend([(None,None)]*r)
     res = linprog(c, A_eq=A, b_eq=v, bounds=bounds, method='highs')
 
-    return res.x
+    return res.success
 
 def effect(mod, t):
     n=sum(mod)
