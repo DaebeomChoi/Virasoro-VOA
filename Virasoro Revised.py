@@ -115,19 +115,19 @@ def cw(i,k):
     return (i-1)*(2*k-i)
 
 #Checking effectivity of conformal block divisors
-k=7
+k=8
 start=time.time()
 rank=rank(4*k-6,k)
 neg=[]
 excep=[]
 
 
-for n in range(8,4*k-5):
+for n in range(6,4*k-5):
     module=sumset(n,k)
     for config in module:
-        if(rank[tuple(config)]<2):
-            continue
         if(config[0]>0):
+            continue
+        if(rank[tuple(config)]<2):
             continue
         level=0
         for i in range(1,k):
@@ -160,8 +160,8 @@ for n in range(8,4*k-5):
                 neg.append([config, bd])
             if((n-1)*(n-2)*coeff==psi):
                 excep.append([config, bd])
-
-end=time.time()
-print(end-start)
-print(excep)
-print(neg)
+    print(n)
+    end=time.time()
+    print(end-start)
+    print(excep)
+    print(neg)
