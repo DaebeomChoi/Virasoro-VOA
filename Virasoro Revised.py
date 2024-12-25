@@ -110,19 +110,37 @@ def bdry(mod):
             corr.append([list(bd), bdres])
     return corr
 
+def bdrypt(mod, p):
+    l=len(mod)
+    dummy=[[*range(0,max(p,mod[0])+1)]]
+    for i in range(1,l):
+        dummy.append([*range(0,max(p,mod[i])+1)])
+    all=itertools.product(*dummy)
+    corr=[]
+    for bd in all:
+        if(sum(bd)==p):
+            bdres=[]
+            for i in range(0,l):
+                bdres.append(mod[i]-bd[i])
+            corr.append([list(bd), bdres])
+    return corr
+
 #conformal weight
 def cw(i,k):
     return (i-1)*(2*k-i)
 
 #Checking effectivity of conformal block divisors
-k=8
+k=9
 start=time.time()
-rank=rank(4*k-6,k)
-neg=[]
-excep=[]
+rank=rank(3*k,k)
+
+
+print(time.time()-start)
 
 
 for n in range(6,4*k-5):
+    neg=[]
+    excep=[]
     module=sumset(n,k)
     for config in module:
         if(config[0]>0):
@@ -134,32 +152,30 @@ for n in range(6,4*k-5):
             level=level+i*config[i]
         if(level<2*k-1):
             continue
-        allbd=bdry(config)
-        for bd in allbd:
-            wt0=sum(bd[0])
-            wt1=sum(bd[1])
-            pt=min(wt0, wt1)
-            if(pt>k-1):
+        for p in range(2, min(math.floor(n/2)+1, k)):
+            if((n-2)*(n-p)+1>(2*n-2-p)*(2*k-1-p)):
                 continue
-            if((n-2)*(n-pt)+1>(2*n-2-pt)*(2*k-1-pt)):
-                continue
-            coeff=0
-            for i in range(2,k+1):
-                bd0=bd[0].copy()
-                bd1=bd[1].copy()
-                bd0[i-1]=bd[0][i-1]+1
-                bd1[i-1]=bd[1][i-1]+1
-                coeff+=cw(i,k)*rank[tuple(bd0)]*rank[tuple(bd1)]
-            psi0=0
-            psi1=0
-            for i in range(2,k+1):
-                psi0+=cw(i,k)*bd[0][i-1]
-                psi1+=cw(i,k)*bd[1][i-1]
-            psi=rank[tuple(config)]*(wt1*(wt1-1)*psi0+wt0*(wt0-1)*psi1)
-            if((n-1)*(n-2)*coeff>psi):
-                neg.append([config, bd])
-            if((n-1)*(n-2)*coeff==psi):
-                excep.append([config, bd])
+            allbd=bdrypt(config,p)
+            for bd in allbd:
+                wt0=sum(bd[0])
+                wt1=sum(bd[1])
+                coeff=0
+                for i in range(2,k+1):
+                    bd0=bd[0].copy()
+                    bd1=bd[1].copy()
+                    bd0[i-1]=bd[0][i-1]+1
+                    bd1[i-1]=bd[1][i-1]+1
+                    coeff+=cw(i,k)*rank[tuple(bd0)]*rank[tuple(bd1)]
+                psi0=0
+                psi1=0
+                for i in range(2,k+1):
+                    psi0+=cw(i,k)*bd[0][i-1]
+                    psi1+=cw(i,k)*bd[1][i-1]
+                psi=rank[tuple(config)]*(wt1*(wt1-1)*psi0+wt0*(wt0-1)*psi1)
+                if((n-1)*(n-2)*coeff>psi):
+                    neg.append([config, bd])
+                if((n-1)*(n-2)*coeff==psi):
+                    excep.append([config, bd])
     print(n)
     end=time.time()
     print(end-start)
