@@ -138,72 +138,82 @@ def appmod(br,k,rank):
             mod.extend([i]*rank[tuple(test)])
     return mod
 
-#difference of virasoro conformal block divisors
+#difference of virasoro conformal block divisors of Vir_{2, 2l-1} and Vir_{2, 2l-3} on \bar{M}_{0,n}
+#level=\sum (a_i-1)
+#If the level is even then we will take (Vir_{2, 2l-3} conformal block divisor)-(Vir_{2, 2l-1} conformal block divisor)
+#If the level is odd then we will take (Vir_{2, 2l-1} conformal block divisor)-(Vir_{2, 2l-3} conformal block divisor)
+
 l=7
 
-nonample=[]
-nonzero=[]
+nef=[]
+ample=[]
 nonnef=[]
 
-for n in range(5,10):
-    rank1=rank(n,l-2)
-    rank2=rank(n,l-1)
-    config=sumset(n,l-2)
-    for module in config:
-        if(module[0]>0):
-            continue
-        check1=0
-        check2=0
-        check3=0
-        level=0
-        for i in range(0,l-2):
-            level+=i*module[i]
-        if(level<2*l-2 or 2*l+1<level):
-            continue
-        fcurve=fcurves(module)
-        for curve in fcurve:
-            check=0
-            mod10=appmod(curve[0],l-2,rank1)
-            mod11=appmod(curve[1],l-2,rank1)
-            mod12=appmod(curve[2],l-2,rank1)
-            mod13=appmod(curve[3],l-2,rank1)
-            ncurve=[]
-            for i in range(0,4):
-                arr=list(curve[i])
-                arr.append(0)
-                ncurve.append(tuple(arr))
-            mod20=appmod(ncurve[0],l-1,rank2)
-            mod21=appmod(ncurve[1],l-1,rank2)
-            mod22=appmod(ncurve[2],l-1,rank2)
-            mod23=appmod(ncurve[3],l-1,rank2)
-            totmod1=itertools.product(mod10,mod11,mod12,mod13)
-            totmod2=itertools.product(mod20,mod21,mod22,mod23)
-            for coll in totmod1:         
-                pair=[]
-                for i in range(0,l-2):
-                    pair.append(coll.count(i))
-                check=check+rank1[tuple(pair)]*(rank1[tuple(pair)]-1)
-            for coll in totmod2:    
-                pair=[]
-                for i in range(0,l-1):
-                    pair.append(coll.count(i))     
-                check=check-rank2[tuple(pair)]*(rank2[tuple(pair)]-1)
-            if(check==0):
-                check1=1
-                zero=curve
-            elif(check>0):
-                check2=1
-                positive=curve
-            else:
-                check3=1
-                negative=curve
-        if(check1==1 and check2==1):
-            nonample.append([module, zero, positive])
-        if(check2==1):
-            nonzero.append(module)
-        if(check3==1):
-            nonnef.append(module)
-    print(n)
+for l in range(7,8):
+    for n in range(5,7):
+        rank1=rank(n,l-2)
+        rank2=rank(n,l-1)
+        config=sumset(n,l-2)
+        for module in config:
+            if(module[0]>0):
+                continue
+            check1=0
+            check2=0
+            check3=0
+            level=0
+            for i in range(0,l-2):
+                level+=i*module[i] #level=\sum (a_i-1)
+            if(level<2*l or 2*l+1<level or level%2==0): #modify here to vary the level
+                continue
+            fcurve=fcurves(module)
+            for curve in fcurve:
+                check=0
+                mod10=appmod(curve[0],l-2,rank1)
+                mod11=appmod(curve[1],l-2,rank1)
+                mod12=appmod(curve[2],l-2,rank1)
+                mod13=appmod(curve[3],l-2,rank1)
+                ncurve=[]
+                for i in range(0,4):
+                    arr=list(curve[i])
+                    arr.append(0)
+                    ncurve.append(tuple(arr))
+                mod20=appmod(ncurve[0],l-1,rank2)
+                mod21=appmod(ncurve[1],l-1,rank2)
+                mod22=appmod(ncurve[2],l-1,rank2)
+                mod23=appmod(ncurve[3],l-1,rank2)
+                totmod1=itertools.product(mod10,mod11,mod12,mod13)
+                totmod2=itertools.product(mod20,mod21,mod22,mod23)
+                for coll in totmod1:         
+                    pair=[]
+                    for i in range(0,l-2):
+                        pair.append(coll.count(i))
+                    check=check-rank1[tuple(pair)]*(rank1[tuple(pair)]-1)
+                for coll in totmod2:    
+                    pair=[]
+                    for i in range(0,l-1):
+                        pair.append(coll.count(i))     
+                    check=check+rank2[tuple(pair)]*(rank2[tuple(pair)]-1)
+                check=check*((-1)**level)
+                if(check==0):
+                    check1=1
+                    zero=curve
+                elif(check>0):
+                    check2=1
+                    positive=curve
+                else:
+                    check3=1
+                    negative=curve
+            if(check3==1):
+                nonnef.append([module, negative])
+            elif(check1==1 and check2==1):
+                nef.append([module, zero, positive])
+            elif(check2==1):
+                ample.append(module)
+            
 
-print(nonample)
+#print the set of modules which givees nef/ample/nonnef divisors. We ignore trivial divisors.
+#if it is nef, then it also gives two F-curves with zero/positive intersection
+#if it is nonnef, then it also gives one F-curve with negative intersection
+print(nef)
+print(ample)
 print(nonnef)
