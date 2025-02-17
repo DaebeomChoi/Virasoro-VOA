@@ -1,0 +1,76 @@
+import time
+
+def cc(p,q):
+    return 1-(6*(p-q)**2/(p*q))
+    
+def cw(p,q,r,s):
+    return ((p*s-q*r)**2-(p-q)**2)/(4*p*q)
+
+def fusion(p,q,r1,s1,r2,s2):
+    tensor=[]
+    for r3 in range(abs(r2-r1)+1, min(r2+r1, 2*p-r1-r2), 2):
+        for s3 in range(abs(s2-s1)+1, s1+s2, 2):
+            if (s3>q/2):
+                s3=q-s3
+            tensor.append([r3,s3])
+    return tensor
+
+def fusdim(p,q,r1,s1,r2,s2,r3,s3):
+    count=0
+    if(abs(r2-r1)+1<=r3 and r3<min(r2+r1, 2*p-r1-r2) and (r2+r1-r3)%2==1 and abs(s2-s1)+1<=s3 and s3<min(s2+s1, 2*q-s1-s2) and (s2+s1-s3)%2==1):
+        count=count+1
+    r3=p-r3
+    s3=q-s3
+    if(abs(r2-r1)+1<=r3 and r3<min(r2+r1, 2*p-r1-r2) and (r2+r1-r3)%2==1 and abs(s2-s1)+1<=s3 and s3<min(s2+s1, 2*q-s1-s2) and (s2+s1-s3)%2==1):
+        count=count+1
+    return count
+
+def rank04(p,q,r1,s1,r2,s2,r3,s3,r4,s4):
+    rank=0
+    for r in range(abs(r2-r1)+1, min(r2+r1, 2*p-r1-r2), 2):
+        for s in range(abs(s2-s1)+1, min(s2+s1, 2*q-s1-s2), 2):
+            rank=rank+fusdim(p,q,r3,s3,r4,s4,r,s)
+    return rank
+
+def rank11(p,q,r,s):
+    rank=0
+    for r1 in range(1,p):
+        for s1 in range(1, q):
+                rank=rank+fusdim(p,q,r1,s1,r1,s1,r,s)
+    return rank//2
+
+def deg04(p,q,r1,s1,r2,s2,r3,s3,r4,s4):
+    deg=rank04(p,q,r1,s1,r2,s2,r3,s3,r4,s4)*(cw(p,q,r1,s1)+cw(p,q,r2,s2)+cw(p,q,r3,s3)+cw(p,q,r4,s4))
+    b=0
+    for r in range(abs(r2-r1)+1, min(r2+r1, 2*p-r1-r2), 2):
+        for s in range(abs(s2-s1)+1, min(s2+s1, 2*q-s1-s2), 2):
+                b=b+cw(p,q,r,s)*fusdim(p,q,r3,s3,r4,s4,r,s)
+    for r in range(abs(r3-r1)+1, min(r3+r1, 2*p-r1-r3), 2):
+        for s in range(abs(s3-s1)+1, min(s3+s1, 2*q-s1-s3), 2):
+                b=b+cw(p,q,r,s)*fusdim(p,q,r2,s2,r4,s4,r,s)
+    for r in range(abs(r4-r1)+1, min(r4+r1, 2*p-r1-r4), 2):
+        for s in range(abs(s4-s1)+1, min(s4+s1, 2*q-s1-s4), 2):
+                b=b+cw(p,q,r,s)*fusdim(p,q,r3,s3,r2,s2,r,s)
+    return deg-b
+
+def deg11(p,q,r,s):
+    deg=rank11(p,q,r,s)*(cc(p,q)/2+cw(p,q,r,s))
+    b=0
+    for r1 in range(1,p):
+        for s1 in range(1, q):
+                b=b+cw(p,q,r1,s1)*fusdim(p,q,r1,s1,r1,s1,r,s)
+    return deg-6*b
+
+p=3
+q=5
+
+for r1 in range(1,p):
+        for s1 in range(1,q//2+1):
+            for r2 in range(1,p):
+                for s2 in range(1, q//2+1):
+                    for r3 in range(1,p):
+                        for s3 in range(1, q//2+1):
+                            for r4 in range(1,p):
+                                for s4 in range(1, q//2+1):
+                                    print(deg04(p,q,r1,s1,r2,s2,r3,s3,r4,s4))
+
